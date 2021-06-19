@@ -7,7 +7,7 @@
 int main(void){
   srand(time(NULL));
     printf("thuoeou");
-    game(3, 0);
+    game(3, 0, 0);
     printf("tuenao");
     return(0);
 }

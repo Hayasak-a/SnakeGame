@@ -86,8 +86,16 @@ Food* remove_eaten_food(Food* foods, int x, int y){
 // Display all the food
 void draw_food (Food *foods)
 {   Food* temp = foods;
+    start_color();
+    init_pair(3, COLOR_CYAN, COLOR_BLACK);
+    init_pair(4, COLOR_MAGENTA, COLOR_BLACK);
     while(temp) {
-        mvprintw(temp->y, temp->x, "%c", temp->type);
-        temp = temp->next;
+      if(temp->type == 'X') { attron(COLOR_PAIR(3)); }
+      else { attron(COLOR_PAIR(4)); }
+      mvprintw(temp->y, temp->x, "%c", temp->type);
+      if(temp->type == 'X') { attroff(COLOR_PAIR(3)); }
+      else { attroff(COLOR_PAIR(4)); }
+      temp = temp->next;
+      
     }
 }

@@ -32,24 +32,24 @@
 
 #include <stdbool.h>
 
-struct Snake {
+struct eSnake {
   int x;
   int y;
   int speed;
   char color[3];
   char symbol;
   bool enemy;
-  struct Snake* next;
+  struct eSnake* next;
 };
 
-typedef struct Snake Snake;
+typedef struct eSnake eSnake;
 
-Snake* init_snake(int x, int y);
-Snake* create_tail(int x, int y);
-Snake* reduced_snake(Snake* snake);
-Snake* move_snake(Snake* snake, int direction);
-Snake* reverse_snake(Snake* snake);
-void draw_snake(Snake* snake);
-bool eat_itself(Snake* snake);
-Snake* remove_tail(Snake* snake);
-int len(Snake* snake);
+eSnake* init_esnake(int x, int y);
+eSnake* create_etail(int x, int y);
+eSnake* reduced_esnake(eSnake* snake);
+eSnake* move_esnake(eSnake* snake, int direction);
+eSnake* reverse_esnake(eSnake* snake);
+void draw_esnake(eSnake* snake);
+bool e_eat_itself(eSnake* snake);
+eSnake* remove_etail(eSnake* snake);
+int elen(eSnake* snake);

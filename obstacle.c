@@ -41,7 +41,11 @@ void add_new_obstacle(Obstacle* obst, Obstacle* new_obst){
 
 // Display all the food
 void draw_obstacles (Obstacle *obst)
-{   Obstacle* temp = obst;
+{   
+  start_color();
+  init_pair(2, COLOR_BLACK, COLOR_WHITE);
+  attron(COLOR_PAIR(2));
+  Obstacle* temp = obst;
     while(temp) {
       int i;
       int j;
@@ -49,10 +53,11 @@ void draw_obstacles (Obstacle *obst)
         {
           for(j = temp->y; j <= temp -> y+temp->ysize; j++)
           {
-            mvprintw(j, i, "V");
+            mvprintw(j, i, "@");
           }
         }
         
         temp = temp->next;
     }
+    attroff(COLOR_PAIR(2));
 }

@@ -2,12 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
 #include "snake.h"
 #include "food.h"
 #include "game_window.h"
 #include "key.h"
 #include "game.h"
 #include "obstacle.h"
+#include "enemy_snake.h"
+#include <stdlib.h>
 
 void generate_points(int *food_x, int *food_y, int width, int height, int x_offset, int y_offset){
     *food_x = rand() % width + x_offset;
@@ -23,7 +26,7 @@ void saveGame(Obstacle * obst, Food * foods, Snake * snek, int score, int lives)
     char file[99];
     scanf("%s", file);
     char fullfile[106];
-    sprintf(fullfile, "saves/%s.dat", file);
+    sprintf(fullfile, "saves/%s.game", file);
     FILE * outfile = fopen(fullfile, "w");
     if( outfile == NULL ) {
     fprintf(stderr, "Couldn't open %s\n", fullfile);
@@ -104,7 +107,7 @@ void updateBestScores(int score) {
     }
   }
 
-  FILE * scorefile = fopen("saves/best_5.game", "w");
+  FILE * scorefile = fopen("saves/best_5", "w");
   for(i = 0; i < 5; i++)
   {
     fwrite(best_scores+i, sizeof(int), 1, scorefile);
@@ -112,8 +115,8 @@ void updateBestScores(int score) {
   fclose(scorefile);
 }
 
-void game(int lives, int s){
-    FILE * scorefile = fopen("saves/best_5.game", "r");
+void game(int lives, int s, int begun, int multiplayer){
+    FILE * scorefile = fopen("saves/best_5", "r");
     if(scorefile!= NULL) {
     int i = 0;
       while(fread(best_scores+i, sizeof(int), 1, scorefile))
@@ -127,13 +130,15 @@ void game(int lives, int s){
     static int x_max, y_max; //Max screen size variables
     static int x_offset, y_offset; // distance between the top left corner of your screen and the start of the board
     gamewindow_t *window; // Name of the board
-    Snake *snake; // The snake
+    Snake *snake, *snake2; // The snake
+    eSnake *enemy1, *enemy2; //Enemy snakes
     Food *foods,*new_food; // List of foods (Not an array)
     Obstacle *obst, *new_obst;
 
     const int height = 30; 
     const int width = 70;
     char ch;
+    int difficulty;
 
     struct timespec timeret;
     timeret.tv_sec = 0;
@@ -154,13 +159,95 @@ void game(int lives, int s){
             // Setting height and width of the board
             x_offset = (x_max / 2) - (width / 2);
             y_offset = (y_max / 2) - (height / 2);
+
+            int currLine;
             
-            //Init board
+             while(begun == 0)
+              {
+                ch = get_char();
+                switch(ch) {
+                case UP:
+                if(currLine<=0) { currLine = 2; }
+                else { currLine--;}
+                break;
+                case DOWN:
+                if(currLine>=4) { currLine = 0; }
+                else { currLine++; }
+                break;
+                case 10:
+                //Value of ENTER key
+                {
+                  if(currLine ==0) { begun = 1;
+                  difficulty = 1; }
+                  else if(currLine==1) { begun = 1;
+                  difficulty = 2; 
+                  }
+                  else if(currLine==2) {
+                    begun = 1;
+                    difficulty = 4;
+                  }
+                  else if(currLine==3)
+                  {
+                    begun = 1;
+                    difficulty = 3;
+                    multiplayer = 1;
+
+                  }
+                  else if(currLine==4)
+                  {
+                    
+
+                  }
+                }
+                break;
+                }
+                start_color();
+                init_pair(1, COLOR_WHITE, COLOR_BLACK);
+                init_pair(2, COLOR_GREEN, COLOR_BLACK);
+                init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+                init_pair(4, COLOR_RED, COLOR_BLACK);
+                init_pair(5, COLOR_CYAN, COLOR_BLACK);
+                init_pair(6, COLOR_YELLOW, COLOR_BLACK);
+                attron(COLOR_PAIR(1));
+                mvprintw(20, 20, "Welcome to SNAKE");
+                attroff(COLOR_PAIR(1));
+                attron(COLOR_PAIR(2));
+                mvprintw(21, 18, "%c Play game EASY", currLine==0 ? '>' : ' ');
+                attroff(COLOR_PAIR(2));
+                attron(COLOR_PAIR(3));
+                mvprintw(22, 18, "%c Play game HARD", currLine==1 ? '>' : ' ');
+                attroff(COLOR_PAIR(3));
+                attron(COLOR_PAIR(4));
+                mvprintw(23, 18, "%c Play game ADVANCED", currLine==2 ? '>' : ' ');
+                attroff(COLOR_PAIR(4));
+                attron(COLOR_PAIR(5));
+                mvprintw(24, 18, "%c Play game MULTIPLAYER", currLine==3 ? '>' : ' ');
+                attroff(COLOR_PAIR(5));
+                attron(COLOR_PAIR(6));
+                mvprintw(25, 18, "%c Load saved game", currLine==4 ? '>' : ' ');
+                attroff(COLOR_PAIR(6));
+                
+                
+              }
+
+            //Init boar
             window = init_GameWindow(x_offset, y_offset, width, height);
             draw_Gamewindow(window);
 
+            snake = (Snake *) malloc(sizeof(snake));
+            snake2 = (Snake *) malloc(sizeof(snake2));
+
+            
+
+            
+
             // Init snake
             snake = init_snake(x_offset + (width / 2), y_offset + (height / 2));
+            snake2 = init_snake(x_offset + (width / 2), y_offset + (height / 2));
+            //enemy1 = init_esnake(x_offset + (width / 2), y_offset + (height / 2)+5);
+            //enemy2 = init_esnake(x_offset + (width / 2), y_offset + (height / 2)-5);
+            return;
+            
             
             // Init foods
             int food_x, food_y, i;
@@ -170,7 +257,7 @@ void game(int lives, int s){
             generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
             type = (rand() > RAND_MAX/2) ? Increase : Decrease; // Randomly deciding type of food
             foods = create_food(food_x, food_y, type);
-            for(i = 1; i < 10; i++){
+            for(i = 1; i < 5 * difficulty; i++){
                 generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
                 while (food_exists(foods,food_x, food_y))
                     generate_points(&food_x, &food_y, width, height, x_offset, y_offset);
@@ -179,14 +266,14 @@ void game(int lives, int s){
                 add_new_food(foods, new_food);
             }
 
-            int obst_num = rand()%5+3;
+            int obst_num = rand()%3+2;
             int obst_xsize = rand()%4;
             int obst_ysize = rand()%4;
             int obst_x, obst_y, j;
             generate_points(&obst_x, &obst_y, width-4, height-4, x_offset, y_offset);
             obst = create_obstacle(obst_x, obst_y, obst_xsize, obst_ysize);
 
-            for(j = 1; j < obst_num; j++)
+            for(j = 1; j < obst_num*difficulty; j++)
             {
               generate_points(&obst_x, &obst_y, width-4, height-4, x_offset, y_offset);
               obst_xsize = rand()%4;
@@ -217,6 +304,18 @@ void game(int lives, int s){
               break;
               case UP:
               temp = move_snake(snake, UP);
+              break;
+              case 'w':
+              snake2 = move_snake(snake2, UP);
+              break;
+              case 'a':
+              snake2 = move_snake(snake2, LEFT);
+              break;
+              case 's':
+              snake2 = move_snake(snake2, DOWN);
+              break;
+              case 'd':
+              snake2 = move_snake(snake2, RIGHT);
               break;
               case ',':
               //Since milestone 2 has no way to reduce snake's size (without Milestone 1 elements)
@@ -258,10 +357,19 @@ void game(int lives, int s){
                 }
                 break;
                 }
+                init_pair(2, COLOR_RED, COLOR_BLACK);
+                attron(COLOR_PAIR(1));
                 mvprintw(20, 20, "Game paused");
+                attroff(COLOR_PAIR(1));
+                attron(COLOR_PAIR(2));
                 mvprintw(21, 18, "%c Unpause game", currLine==0 ? '>' : ' ');
+                attroff(COLOR_PAIR(2));
+                attron(COLOR_PAIR(3));
                 mvprintw(22, 18, "%c Save game", currLine==1 ? '>' : ' ');
+                attroff(COLOR_PAIR(3));
+                attron(COLOR_PAIR(4));
                 mvprintw(23, 18, "%c Quit game", currLine==2 ? '>' : ' ');
+                attroff(COLOR_PAIR(4));
                 
               }
               break;
@@ -292,7 +400,10 @@ void game(int lives, int s){
             mvprintw(21, 20, "Lives remaining: %d", lives);
             mvprintw(22, 20, "Score: %d", score);
             draw_Gamewindow(window);
+            if(multiplayer==1) {draw_snake(snake2); }
             draw_snake(snake);
+            //draw_esnake(enemy1);
+            //draw_esnake(enemy2);
             draw_food(foods);
             draw_obstacles(obst);
             break;
@@ -311,7 +422,7 @@ void game(int lives, int s){
               {
                 input = get_char();
               }
-              game(lives-1, score);
+              game(lives-1, score, difficulty, multiplayer);
             }
             else 
             {
@@ -330,7 +441,7 @@ void game(int lives, int s){
               {
                 input = get_char();
               }
-              game(3, 0);
+              game(3, 0, 0, 0);
             }        
             break;
         case EXIT:

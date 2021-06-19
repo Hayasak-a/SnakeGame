@@ -1,7 +1,27 @@
-Implementation of Project Milestone 2
-Since I failed to complete Milestone 1, many objectives from that are incomplete
-However, all features
+Implementation of Final Project
 
-The only feature with an error is reversing the snake upon hitting an obstacle. The snake will correctly reverse, but the obstacle will 'eat' the head of the snake, shrinking it
+Complete:
+Color added to game
+Difficulty levels
+Color the menu with each item in the menu with different color (other than black -:p)
+Eat itself - reduce the overall length 
+// Since eating food to increase size isn't implemented, I instead set the snake's initial size to 5 so this method works. It only works if the head and tail would be in the same place AFTER movement - the snake doesn't eat itself if the head moves to a spot at the same time the tail moves away
+Create the Multi-player functionality where we would be able to control the second snake with 'AWSD' letters.
+//Multi-player functionality 
 
-Hitting "," will remove the tail from the snake. This is used to implement a game over scenario despite not having any (intended) way to shrink the snake
+
+Partial Incompletions:
+Difficulty levels don't affect speed of game
+Multiplayer snakes don't interact
+
+Incomplete, code exists but crashes:
+Introduce new enemy snakes & update game over scenario
+
+Incomplete:
+Display list of saved games and Load one
+Load games from files
+Newly spawned enemy snakes should bounce back
+
+// There's a menu option for this. It doesn't work.
+
+Add music file to your game

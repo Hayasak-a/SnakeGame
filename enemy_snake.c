@@ -1,8 +1,39 @@
+/* snake.c -------
+ *
+ * Filename: snake.c
+ * Description:
+ * Author: Rishabh Agrawal
+ * Maintainer:
+ * Created: Sun Sep 13 9:12:30 2020
+ * Last-Updated: September 13 22:40 2020
+ *           By: Rishabh Agrawal
+ *
+ */
+
+/* Commentary:
+ *
+ *
+ *
+ */
+
+/* Change log:
+ *
+ *
+ */
+
+/* Copyright (c) 2016 The Trustees of Indiana University and
+ * Indiana University Research and Technology Corporation.
+ *
+ * All rights reserved.
+ *
+ * Additional copyrights may follow
+ */
+
 
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "snake.h"
+#include "enemy_snake.h"
 #include "key.h"
 #include "obstacle.h"
 #include <ncurses.h>
@@ -14,12 +45,16 @@ int RIGHT_EDGE;
 
 
 // Initialize snake
-Snake* init_snake(int x, int y){
-  Snake* head = create_tail(x, y);
-  Snake* tail1 = create_tail(x-1, y);
-  Snake* tail2 = create_tail(x-2, y);
+eSnake* init_esnake(int x, int y){
+  eSnake* head = create_etail(x, y);
+  eSnake* tail1 = create_etail(x-1, y);
+  eSnake* tail2 = create_etail(x-2, y);
+  eSnake* tail3 = create_etail(x-3, y);
+  eSnake* tail4 = create_etail(x-4, y);
   tail1->next = tail2;
   head->next = tail1;
+  tail2->next = tail3;
+  tail3->next = tail4;
   LEFT_EDGE = x-34;
   RIGHT_EDGE = x+34;
   TOP_EDGE = y-15;
@@ -27,7 +62,7 @@ Snake* init_snake(int x, int y){
   return head;
 }
 
-Snake* reduced_snake(Snake* snake) {
+eSnake* reduced_esnake(eSnake* snake) {
   if(snake-> next == NULL)
   {
     return NULL;
@@ -38,8 +73,8 @@ Snake* reduced_snake(Snake* snake) {
 
 }
 // Creates one tail
-Snake* create_tail(int x, int y){
-  Snake* snake = malloc(sizeof(snake));
+eSnake* create_etail(int x, int y){
+  eSnake* snake = malloc(sizeof(snake));
   snake->color[0] = 0;
   snake->color[1] = 0;
   snake->color[2] = 0;
@@ -52,9 +87,9 @@ Snake* create_tail(int x, int y){
 }
 
 // Moves the snake in the input direction
-Snake* move_snake(Snake* snake, int direction){
+eSnake* move_esnake(eSnake* snake, int direction){
     // TODO
-  Snake* new_head = malloc(sizeof(new_head));
+  eSnake* new_head = malloc(sizeof(new_head));
 
   // Set the new head to have the x and y coordinates as the existing head of the snake
   new_head->x = snake->x;
@@ -113,6 +148,8 @@ Snake* move_snake(Snake* snake, int direction){
     new_head->y = TOP_EDGE;
   }
 
+  
+
 
   
   //Set new head as the new head of the entire snake
@@ -121,7 +158,8 @@ Snake* move_snake(Snake* snake, int direction){
   new_head->next = snake;
   strcpy(new_head->color, snake->color);
   new_head->symbol = snake->symbol;
-  remove_tail(new_head);
+  remove_etail(new_head);
+  if(e_eat_itself(new_head)==true) { remove_etail(new_head); }
 
 
   
@@ -129,11 +167,11 @@ Snake* move_snake(Snake* snake, int direction){
   return new_head;
 }
 
-Snake* reverse_snake(Snake* snake){
+eSnake* reverse_esnake(eSnake* snake){
   if(snake->next==NULL) { return NULL; }
-  struct Snake* prev = NULL;
-  struct Snake* curr = snake;
-  struct Snake* next = NULL;
+  struct eSnake* prev = NULL;
+  struct eSnake* curr = snake;
+  struct eSnake* next = NULL;
 
   while(curr != NULL)
   {
@@ -143,7 +181,7 @@ Snake* reverse_snake(Snake* snake){
     curr = next;
 
   }
-  Snake* temp = prev;
+  eSnake* temp = prev;
   int k = 0;
   while(temp->next)
   {
@@ -156,9 +194,9 @@ Snake* reverse_snake(Snake* snake){
 
 }
 
-Snake* remove_tail(Snake* snake){
+eSnake* remove_etail(eSnake* snake){
   if(!snake->next) { return NULL; }
-    Snake* end = snake;
+    eSnake* end = snake;
     while(end->next->next)
         end = end->next;
     free(end->next);
@@ -167,9 +205,9 @@ Snake* remove_tail(Snake* snake){
 }
 
 // draws the snake on the board
-void draw_snake(Snake* snake){
+void draw_esnake(eSnake* snake){
   start_color();
-  init_pair(1, COLOR_GREEN, COLOR_BLACK); 
+  init_pair(1, COLOR_RED, COLOR_BLACK); 
   attron(COLOR_PAIR(1));
   while(snake){
     mvprintw(snake->y, snake->x, "%c", snake->symbol);
@@ -179,8 +217,8 @@ void draw_snake(Snake* snake){
 }
 
 // checks if it eats itself, if it does, then return true
-bool eat_itself(Snake* snake){
-  Snake* temp = snake;
+bool e_eat_itself(eSnake* snake){
+  eSnake* temp = snake;
     // TODO for Milestone 2 only
     while(temp->next)
     {
